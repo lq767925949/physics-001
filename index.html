@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="zh-CN">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用刻度尺测量长度 · 初中物理互动课件</title>
+  <script src="https://img.zxxk.com/aed/ai/upload/20260522/c4d22df8ccc64e9989b8a300ca8f25ff.js"></script>
+  <script src="https://img.zxxk.com/aed/ai/upload/20260522/d8823c9bb7374018a11d5ff31d01d94c.js"></script>
+  <style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#eef1f4;color:#2b3a4a;}
+.stage-shadow{box-shadow:0 4px 12px rgba(43,58,74,.12);}
+.float-shadow{box-shadow:0 8px 24px rgba(43,58,74,.22);}
+@keyframes shakeX{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.shake{animation:shakeX .45s ease;}
+@keyframes fadeInRow{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.row-in{animation:fadeInRow .5s ease;}
+@keyframes blinkRed{0%,100%{outline:2px solid #d9534f}50%{outline:2px solid transparent}}
+.blink-red{animation:blinkRed .8s ease 3;}
+@keyframes popIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+.pop-in{animation:popIn .35s ease;}
+.dragging{cursor:grabbing!important;}
+svg text{user-select:none;}
+.grabbable{cursor:grab;}
+input[type=text]{outline:none;}
+@media print{
+  body *{visibility:hidden;}
+  #reportCard,#reportCard *{visibility:visible;}
+  #reportCard{position:absolute;left:0;top:0;width:100%;box-shadow:none;}
+}
+</style>
+  <meta name="signature" content="QQABC0IsysjYxAxwyJbaQ0Ekiyi51sWzJC5MUQYB6I1bchtAHBA=">
+ </head>
+ <body class="h-screen w-screen overflow-hidden flex flex-col">
+  <div id="topbar" class="h-[8%] min-h-[56px] bg-white flex items-center px-4 gap-2 stage-shadow z-20">
+   <div class="font-bold text-lg mr-4 whitespace-nowrap" style="color:#2b3a4a;">
+    用刻度尺测量长度
+   </div>
+   <div id="stepTabs" class="flex flex-1 gap-2 overflow-x-auto"></div>
+  </div>
+  <div class="flex flex-1 min-h-0">
+   <div id="mainArea" class="relative" style="width:66%;">
+    <div id="stageWrap" class="absolute inset-0 p-3">
+     <svg id="stage" class="w-full h-full rounded-lg stage-shadow" viewbox="0 0 1000 560" preserveaspectratio="xMidYMid meet" style="background:#c9a26b;">
+      <defs>
+       <pattern id="wear" width="6" height="6" patterntransform="rotate(45)" patternunits="userSpaceOnUse">
+        <rect width="6" height="6" fill="#d8d8d8"></rect>
+        <line x1="0" y1="0" x2="0" y2="6" stroke="#a9a9a9" stroke-width="2"></line>
+       </pattern>
+       <marker id="arrGreen" viewbox="0 0 10 10" refx="8" refy="5" markerwidth="7" markerheight="7" orient="auto-start-reverse">
+        <path d="M1,1 L9,5 L1,9" fill="none" stroke="#2fa88a" stroke-width="1.6"></path>
+       </marker>
+       <marker id="arrRed" viewbox="0 0 10 10" refx="8" refy="5" markerwidth="7" markerheight="7" orient="auto-start-reverse">
+        <path d="M1,1 L9,5 L1,9" fill="none" stroke="#d9534f" stroke-width="1.6"></path>
+       </marker>
+       <marker id="arrDark" viewbox="0 0 10 10" refx="8" refy="5" markerwidth="6" markerheight="6" orient="auto-start-reverse">
+        <path d="M1,1 L9,5 L1,9" fill="none" stroke="#2b3a4a" stroke-width="1.6"></path>
+       </marker>
+      </defs> <rect x="0" y="0" width="1000" height="560" fill="#c9a26b"></rect> <rect x="0" y="0" width="1000" height="560" fill="none" stroke="#b08b52" stroke-width="6"></rect> <g id="layerScene"></g> <g id="layerOverlay"></g>
+     </svg>
+    </div>
+    <div id="magnifier" class="absolute hidden float-shadow bg-white rounded-lg p-3" style="right:16px;top:16px;width:340px;z-index:30;">
+     <div class="flex justify-between items-center mb-1">
+      <div class="font-bold text-sm">
+       放大镜 · 刻度尺特写
+      </div><button id="magClose" class="text-xs px-2 py-1 rounded bg-gray-200 hover:bg-gray-300">关闭</button>
+     </div>
+     <svg id="magSvg" viewbox="0 0 320 150" class="w-full"></svg>
+     <div class="text-xs mt-1" style="color:#2b3a4a;">
+      量程标识：0~30cm ｜ 最小格（分度值）：1mm ｜ 灰色斜纹区：零刻度线磨损
+     </div>
+    </div>
+    <div id="sightPanel" class="absolute hidden float-shadow bg-white rounded-lg p-3 pop-in" style="left:50%;top:12px;transform:translateX(-50%);z-index:30;">
+     <div class="font-bold text-sm mb-2">
+      请选择读数时的视线方向
+     </div>
+     <div class="flex gap-2">
+      <button data-sight="front" class="sightBtn px-3 py-1.5 rounded border text-sm hover:bg-gray-100">视线正对刻度线</button> <button data-sight="up" class="sightBtn px-3 py-1.5 rounded border text-sm hover:bg-gray-100">从上方斜视</button> <button data-sight="down" class="sightBtn px-3 py-1.5 rounded border text-sm hover:bg-gray-100">从下方斜视</button>
+     </div>
+    </div>
+    <div id="readPanel" class="absolute hidden float-shadow bg-white rounded-lg p-3 pop-in" style="left:50%;bottom:14px;transform:translateX(-50%);z-index:30;">
+     <div class="text-sm mb-1" id="readLabel">
+      读数（单位 cm，保留两位小数）
+     </div>
+     <div class="flex items-center gap-2">
+      <input id="readInput" type="text" class="border rounded px-2 py-1.5 w-32 text-sm" placeholder="如 25.90"> <span class="text-sm">cm<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACcAAAAVCAIAAABKc2DEAAAAqElEQVR4Xu1TWw6AMAza/Q+txrQig7r4M/0ZaQylD9Rp209sdC1T4dLwHjnb+mHnYiN34G0SKHUErrzLZ5BC8ZJ3BoqGduWsshJgUsYTZGEq/KyyxTeWVU69UyKrcq4CXz2G29Qj8YYDpQGPcVWIiIAYZzr4mphzDysD+CD07s8ZLBInIaiyTUkywtUHWAmxJHwNAg4F5K7yuX6H5Toby3U2luts/ON6AA30jyjOazdgAAAAAElFTkSuQmCC" style="position: absolute; left: -99999px; top: -99999px; opacity: 0; pointer-events: none; width: 1px; height: 1px;"></span> <button id="readSubmit" class="px-3 py-1.5 rounded text-white text-sm" style="background:#2fa88a;">记录</button>
+     </div>
+     <div class="text-xs mt-1 text-gray-500">
+      提示：起点为 1.00cm 整刻度，读数 = 末端刻度 − 1.00cm
+     </div>
+    </div>
+    <div id="reportWrap" class="absolute inset-0 hidden p-4 z-20">
+     <div id="reportCard" class="bg-white rounded-lg float-shadow h-full overflow-auto p-6 pop-in"></div>
+    </div>
+   </div>
+   <div id="sideArea" class="flex flex-col min-h-0" style="width:34%;">
+    <div class="flex-1 min-h-0 p-3 pb-1">
+     <div class="bg-white rounded-lg stage-shadow h-full flex flex-col overflow-hidden">
+      <div class="px-3 py-2 font-bold text-sm border-b flex justify-between items-center">
+       <span>数据记录表</span> <span id="tableUnit" class="text-xs font-normal text-gray-500"></span>
+      </div>
+      <div class="flex-1 overflow-auto">
+       <table class="w-full text-sm">
+        <thead id="dataHead" class="bg-gray-50 sticky top-0"></thead>
+        <tbody id="dataBody"></tbody>
+       </table>
+      </div>
+      <div id="avgBar" class="px-3 py-2 border-t text-sm font-bold hidden" style="color:#2fa88a;"></div>
+     </div>
+    </div>
+    <div class="flex-1 min-h-0 p-3 pt-1">
+     <div class="bg-white rounded-lg stage-shadow h-full flex flex-col overflow-hidden">
+      <div class="px-3 py-2 font-bold text-sm border-b">
+       提示与反馈
+      </div>
+      <div id="tipBox" class="flex-1 overflow-auto p-3 text-sm leading-relaxed"></div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div id="toolbar" class="h-[8%] min-h-[56px] bg-white flex items-center px-4 gap-3 stage-shadow z-20">
+   <button id="btnReplay" class="px-4 py-2 rounded text-sm text-white" style="background:#2b3a4a;">重播</button> <button id="btnGood" class="px-4 py-2 rounded text-sm text-white" style="background:#2fa88a;">正确示范</button> <button id="btnBad" class="px-4 py-2 rounded text-sm text-white" style="background:#d9534f;">错误示范</button> <button id="btnSubmit" class="px-4 py-2 rounded text-sm text-white" style="background:#e6a23c;">提交</button> <button id="btnPrint" class="px-4 py-2 rounded text-sm text-white opacity-40 cursor-not-allowed" style="background:#2b3a4a;">打印报告</button>
+   <div class="flex-1"></div>
+   <div id="stepHint" class="text-xs text-gray-500"></div>
+  </div>
+  <script>
+const NS="http://www.w3.org/2000/svg";
+const CM=26;
+const state={
+  step:1,
+  unlocked:1,
+  done:{1:false,2:false,3:false,4:false,5:false},
+  mistakes:[],
+  s1:{range:null,div:null,zero:null},
+  s2:{phase:"len",lenVals:[],widVals:[],aligned:false,sightOK:false,count:0},
+  s3:{vals:[],placedL:false,placedR:false,count:0},
+  s4:{wrapped:false,L:null,n:null,d:null},
+  drag:null
+};
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);
+  for(const k in attrs){e.setAttribute(k,attrs[k]);}
+  if(parent){parent.appendChild(e);}
+  return e;
+}
+function clearLayer(id){const n=document.getElementById(id);if(n){n.innerHTML="";}}
+function svgEl(id){return document.getElementById(id);}
+function tip(html,type){
+  const box=document.getElementById("tipBox");
+  const colors={ok:"#2fa88a",err:"#d9534f",warn:"#e6a23c",info:"#2b3a4a"};
+  const c=colors[type]||colors.info;
+  const div=document.createElement("div");
+  div.className="mb-2 p-2 rounded pop-in";
+  div.style.borderLeft="4px solid "+c;
+  div.style.background="#f7f9fa";
+  div.innerHTML=html;
+  box.appendChild(div);
+  box.scrollTop=box.scrollHeight;
+}
+function tipClear(){document.getElementById("tipBox").innerHTML="";}
+function markMistake(key){
+  if(!state.mistakes.includes(key)){state.mistakes.push(key);}
+}
+function rand2(base,spread){
+  const v=base+(Math.random()*2-1)*spread;
+  return Math.round(v*100)/100;
+}
+function fmt2(v){return v.toFixed(2);}
+function avg(arr){
+  const s=arr.reduce((a,b)=>a+b,0);
+  return Math.round((s/arr.length)*100)/100;
+}
+
+const steps=[
+  {id:1,name:"1 检查器材"},
+  {id:2,name:"2 测课本长宽"},
+  {id:3,name:"3 测硬币直径"},
+  {id:4,name:"4 测细铜丝直径"},
+  {id:5,name:"5 实验报告"}
+];
+function renderTabs(){
+  const wrap=document.getElementById("stepTabs");
+  wrap.innerHTML="";
+  steps.forEach(s=>{
+    const b=document.createElement("button");
+    let cls="px-3 py-2 rounded text-sm whitespace-nowrap border transition ";
+    if(s.id===state.step){cls+="text-white border-transparent";b.style.background="#2b3a4a";}
+    else if(s.id<=state.unlocked){cls+="bg-white hover:bg-gray-100";b.style.color="#2b3a4a";}
+    else{cls+="bg-gray-100 text-gray-400 cursor-not-allowed";}
+    b.className=cls;
+    b.textContent=s.name+(state.done[s.id]?" ✓":"");
+    if(state.done[s.id]&&s.id!==state.step){b.style.color="#2fa88a";b.style.fontWeight="bold";}
+    b.onclick=()=>{
+      if(s.id<=state.unlocked){gotoStep(s.id);}
+      else{tip("请先完成前面的步骤再进入「"+s.name+"」。","warn");}
+    };
+    wrap.appendChild(b);
+  });
+}
+
+function drawRuler(g,x,y,lenCm,opts){
+  opts=opts||{};
+  const grp=el("g",{transform:"translate("+x+","+y+")"},g);
+  const w=lenCm*CM;
+  const h=44;
+  const body=el("rect",{x:0,y:0,width:w,height:h,rx:4,fill:"#ffffff",stroke:"#2b3a4a","stroke-width":2},grp);
+  if(opts.worn){
+    el("rect",{x:0,y:0,width:CM,height:h,fill:"url(#wear)",opacity:0.85},grp);
+  }
+  for(let mm=0;mm<=lenCm*10;mm++){
+    const px=mm*CM/10;
+    let len=6,sw=1,col="#2b3a4a";
+    if(mm%10===0){len=20;sw=1.8;}
+    else if(mm%5===0){len=12;sw=1.2;}
+    el("line",{x1:px,y1:h,x2:px,y2:h-len,stroke:col,"stroke-width":sw},grp);
+    if(mm%10===0&&mm>0){
+      const t=el("text",{x:px,y:h-24,"font-size":11,"text-anchor":"middle",fill:"#2b3a4a"},grp);
+      t.textContent=mm/10;
+    }
+  }
+  if(opts.worn){
+    const t=el("text",{x:CM/2,y:h-24,"font-size":10,"text-anchor":"middle",fill:"#777"},grp);
+    t.textContent="磨损";
+  }
+  if(opts.id){grp.setAttribute("id",opts.id);}
+  return grp;
+}
+
+function drawMagnifier(){
+  const s=svgEl("magSvg");
+  s.innerHTML="";
+  const scale=9;
+  const baseY=110;
+  el("rect",{x:0,y:0,width:320,height:150,fill:"#fff"},s);
+  el("rect",{x:0,y:baseY-44,width:320,height:44,fill:"#fff",stroke:"#2b3a4a","stroke-width":2},s);
+  el("rect",{x:0,y:baseY-44,width:1*scale*10/10*10,height:44,fill:"url(#wear)",opacity:0.9},s);
+  const wearW=1*scale*10/10*10;
+  const tw=el("text",{x:wearW/2,y:baseY-50,"font-size":10,"text-anchor":"middle",fill:"#888"},s);
+  tw.textContent="零刻度线磨损";
+  for(let mm=0;mm<=30;mm++){
+    const px=mm*scale;
+    let len=8,sw=1;
+    if(mm%10===0){len=26;sw=2;}
+    else if(mm%5===0){len=16;sw=1.4;}
+    el("line",{x1:px,y1:baseY,x2:px,y2:baseY-len,stroke:"#2b3a4a","stroke-width":sw},s);
+    if(mm%10===0){
+      const t=el("text",{x:px,y:baseY-30,"font-size":11,"text-anchor":"middle",fill:"#2b3a4a"},s);
+      t.textContent=mm/10;
+    }
+  }
+  el("line",{x1:scale,y1:baseY+14,x2:scale*2,y2:baseY+14,stroke:"#2fa88a","stroke-width":2,"marker-start":"url(#arrGreen)","marker-end":"url(#arrGreen)"},s);
+  const t1=el("text",{x:scale*1.5,y:baseY+30,"font-size":11,"text-anchor":"middle",fill:"#2fa88a","font-weight":"bold"},s);
+  t1.textContent="1mm（分度值）";
+  const t2=el("text",{x:250,y:30,"font-size":12,fill:"#2b3a4a","font-weight":"bold"},s);
+  t2.textContent="量程 0~30cm";
+}
+
+function buildStep1(){
+  clearLayer("layerScene");
+  clearLayer("layerOverlay");
+  const g=svgEl("layerScene");
+  const ruler=drawRuler(g,180,240,30,{worn:true,id:"ruler1"});
+  ruler.classList.add("grabbable");
+  ruler.style.cursor="pointer";
+  ruler.addEventListener("click",()=>{
+    drawMagnifier();
+    document.getElementById("magnifier").classList.remove("hidden");
+  });
+  const t=el("text",{x:500,y:200,"font-size":16,"text-anchor":"middle",fill:"#2b3a4a","font-weight":"bold"},g);
+  t.textContent="点击刻度尺，用放大镜观察它的三要素";
+  const t2=el("text",{x:500,y:320,"font-size":13,"text-anchor":"middle",fill:"#5a4a2f"},g);
+  t2.textContent="观察：量程 ｜ 分度值 ｜ 零刻度线是否磨损";
+}
+
+function buildStep1Controls(){
+  const box=document.getElementById("tipBox");
+  const div=document.createElement("div");
+  div.className="p-2 rounded bg-gray-50 border";
+  div.innerHTML=
+    '<div class="font-bold mb-2">请根据放大观察结果选择：</div>'+
+    '<div class="mb-2">量程：<select id="selRange" class="border rounded px-2 py-1 text-sm">'+
+    '<option value="">请选择</option><option value="30">0~30cm</option><option value="15">0~15cm</option><option value="50">0~50cm</option></select></div>'+
+    '<div class="mb-2">分度值：<select id="selDiv" class="border rounded px-2 py-1 text-sm">'+
+    '<option value="">请选择</option><option value="1mm">1mm</option><option value="1cm">1cm</option><option value="0.5cm">0.5cm</option></select></div>'+
+    '<div class="mb-2">零刻度线：<select id="selZero" class="border rounded px-2 py-1 text-sm">'+
+    '<option value="">请选择</option><option value="worn">已磨损</option><option value="ok">未磨损</option></select></div>'+
+    '<button id="s1Check" class="px-3 py-1.5 rounded text-white text-sm" style="background:#2fa88a;">确认选择</button>';
+  box.appendChild(div);
+  document.getElementById("s1Check").onclick=()=>{
+    const r=document.getElementById("selRange").value;
+    const d=document.getElementById("selDiv").value;
+    const z=document.getElementById("selZero").value;
+    let ok=true;
+    const mark=(id,good)=>{
+      const e=document.getElementById(id);
+      e.style.border=good?"2px solid #2fa88a":"2px solid #d9534f";
+      if(!good){e.classList.remove("shake");void e.offsetWidth;e.classList.add("shake");}
+    };
+    mark("selRange",r==="30");
+    mark("selDiv",d==="1mm");
+    mark("selZero",z==="worn");
+    ok=(r==="30"&&d==="1mm"&&z==="worn");
+    if(!ok){
+      markMistake("三观察选择有误");
+      tip("有选项不正确，红框处再想想——可以再次点击刻度尺，<b>放大看看零刻度线</b>和最小格。","err");
+      return;
+    }
+    state.s1={range:"0~30cm",div:"1mm",zero:"已磨损"};
+    state.done[1]=true;
+    state.unlocked=Math.max(state.unlocked,2);
+    renderTabs();
+    tip("✔ 全部正确！量程 0~30cm，分度值 1mm，零刻度线已磨损。","ok");
+    tip("要领：零刻度线磨损时，可从 <b>1.00cm</b> 整刻度线开始测量，末端读数要 <b>减去 1.00cm</b>。","info");
+    tip("点击顶部「2 测课本长宽」进入下一步。","info");
+    if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+  };
+}
+
+let book={x:300,y:200,w:250,h:170,angle:0};
+let ruler2={x:280,y:430,angle:0};
+let s2Target=0;
+
+function buildStep2(){
+  clearLayer("layerScene");
+  clearLayer("layerOverlay");
+  state.s2.aligned=false;
+  state.s2.sightOK=false;
+  document.getElementById("sightPanel").classList.add("hidden");
+  document.getElementById("readPanel").classList.add("hidden");
+  const g=svgEl("layerScene");
+  const title=el("text",{x:500,y:36,"font-size":15,"text-anchor":"middle","font-weight":"bold",fill:"#2b3a4a"},g);
+  title.textContent="拖动刻度尺贴紧课本被测边（金色高亮边），并保持平行";
+  const bookG=el("g",{id:"bookG",transform:"translate("+book.x+","+book.y+")"},g);
+  el("rect",{x:0,y:0,width:book.w,height:book.h,rx:6,fill:"#f5f0e6",stroke:"#2b3a4a","stroke-width":2},bookG);
+  el("rect",{x:0,y:0,width:14,height:book.h,fill:"#2b3a4a",opacity:0.85},bookG);
+  const bt=el("text",{x:book.w/2+8,y:book.h/2,"font-size":18,"text-anchor":"middle",fill:"#2b3a4a","font-weight":"bold"},bookG);
+  bt.textContent="物理课本";
+  const edge=el("line",{id:"targetEdge",x1:0,y1:book.h+6,x2:book.w,y2:book.h+6,stroke:"#e6a23c","stroke-width":5,"stroke-linecap":"round"},bookG);
+  const et=el("text",{x:book.w/2,y:book.h+26,"font-size":12,"text-anchor":"middle",fill:"#e6a23c","font-weight":"bold"},bookG);
+  et.textContent=state.s2.phase==="len"?"被测边：长":"被测边：宽";
+  const rulerG=drawRuler(g,ruler2.x,ruler2.y,30,{worn:true,id:"ruler2"});
+  rulerG.classList.add("grabbable");
+  rulerG.style.cursor="grab";
+  makeDraggable(rulerG,(dx,dy)=>{
+    ruler2.x+=dx;ruler2.y+=dy;
+    rulerG.setAttribute("transform","translate("+ruler2.x+","+ruler2.y+")");
+    checkAlign(false);
+  },()=>{checkAlign(true);});
+  makeDraggable(bookG,(dx,dy)=>{
+    book.x+=dx;book.y+=dy;
+    bookG.setAttribute("transform","translate("+book.x+","+book.y+")");
+    checkAlign(false);
+  },()=>{checkAlign(true);});
+  updateS2TableHead();
+  tip("任务：测量课本的<b>"+(state.s2.phase==="len"?"长":"宽")+"</b>，共测 3 次。","info");
+  tip("① 拖动刻度尺，使有刻度的一边<b>贴紧</b>金色被测边；② 保持<b>平行</b>；③ 对齐后选择视线方向并读数。","info");
+}
+
+function checkAlign(final){
+  const edgeY=book.y+book.h+8;
+  const rulerTopY=ruler2.y;
+  const dist=Math.abs(edgeY-rulerTopY);
+  const overlap=!(ruler2.x>book.x+book.w||ruler2.x+30*CM<book.x);
+  const ok=dist<26&&overlap;
+  const edge=svgEl("targetEdge");
+  if(ok){
+    if(edge){edge.setAttribute("stroke","#2fa88a");}
+    if(final&&!state.s2.aligned){
+      state.s2.aligned=true;
+      tip("✔ 贴紧且平行，放置正确！请选择读数时的<b>视线方向</b>。","ok");
+      document.getElementById("sightPanel").classList.remove("hidden");
+      drawSpanHint();
+    }
+  }else{
+    if(edge){edge.setAttribute("stroke","#e6a23c");}
+    state.s2.aligned=false;
+    if(final){
+      markMistake("刻度尺放置不规范");
+      tip("还未放正确：刻度尺<b>有刻度的一边要贴紧被测边</b>，并且要与被测边<b>平行</b>。","err");
+    }
+  }
+}
+
+function drawSpanHint(){
+  const ov=svgEl("layerOverlay");
+  ov.innerHTML="";
+  const y=book.y+book.h+8;
+  const startX=ruler2.x+1*CM;
+  const endCm=state.s2.phase==="len"?26.90:19.40;
+  const endX=ruler2.x+endCm*CM;
+  el("line",{x1:startX,y1:y-70,x2:startX,y2:y+6,stroke:"#2b3a4a","stroke-width":1.2,"stroke-dasharray":"4 3"},ov);
+  el("line",{x1:endX,y1:y-70,x2:endX,y2:y+6,stroke:"#2b3a4a","stroke-width":1.2,"stroke-dasharray":"4 3"},ov);
+  el("line",{x1:startX,y1:y-56,x2:endX,y2:y-56,stroke:"#2fa88a","stroke-width":2,"marker-start":"url(#arrGreen)","marker-end":"url(#arrGreen)"},ov);
+  const t=el("text",{x:(startX+endX)/2,y:y-64,"font-size":13,"text-anchor":"middle",fill:"#2fa88a","font-weight":"bold"},ov);
+  t.textContent="长度 = 末端读数 − 1.00cm";
+  const ts=el("text",{x:startX,y:y-78,"font-size":11,"text-anchor":"middle",fill:"#2b3a4a"},ov);
+  ts.textContent="起点 1.00cm";
+  const te=el("text",{x:endX,y:y-78,"font-size":11,"text-anchor":"middle",fill:"#2b3a4a"},ov);
+  te.textContent="末端刻度";
+}
+
+function setupSight(){
+  document.querySelectorAll(".sightBtn").forEach(b=>{
+    b.onclick=()=>{
+      const v=b.getAttribute("data-sight");
+      if(v==="front"){
+        state.s2.sightOK=true;
+        document.getElementById("sightPanel").classList.add("hidden");
+        document.getElementById("readPanel").classList.remove("hidden");
+        document.getElementById("readLabel").textContent=(state.s2.phase==="len"?"长":"宽")+" 的第 "+(state.s2.count+1)+" 次读数（cm，两位小数）";
+        document.getElementById("readInput").value="";
+        document.getElementById("readInput").focus();
+        tip("✔ 视线正对刻度线，读数才准确。请输入读数。","ok");
+      }else{
+        markMistake("读数时视线斜视");
+        showBadSight(v);
+      }
+    };
+  });
+}
+
+function showBadSight(dir){
+  const ov=svgEl("layerOverlay");
+  const y=book.y+book.h+8;
+  const ex=ruler2.x+15*CM;
+  const sy=dir==="up"?y-160:y+120;
+  el("line",{x1:ex-90,y1:sy,x2:ex,y2:y-10,stroke:"#d9534f","stroke-width":2,"stroke-dasharray":"6 4","marker-end":"url(#arrRed)"},ov);
+  el("circle",{cx:ex-90,cy:sy,r:10,fill:"none",stroke:"#d9534f","stroke-width":2},ov);
+  const t=el("text",{x:ex+14,y:y-40,"font-size":13,fill:"#d9534f","font-weight":"bold"},ov);
+  t.textContent=dir==="up"?"斜视读数偏大":"斜视读数偏小";
+  const r=el("rect",{x:ex-130,y:y-190,width:280,height:44,rx:6,fill:"#d9534f",opacity:0.12},ov);
+  tip("✘ 视线斜视会使读数"+(dir==="up"?"偏大":"偏小")+"，读数时视线要<b>正对刻度线</b>。请重新选择。","err");
+}
+
+function setupReadSubmit(){
+  document.getElementById("readSubmit").onclick=()=>{
+    const inp=document.getElementById("readInput");
+    const raw=inp.value.trim();
+    const val=parseFloat(raw);
+    if(isNaN(val)){
+      inp.style.border="2px solid #d9534f";
+      tip("请输入数字读数。","err");
+      return;
+    }
+    const parts=raw.split(".");
+    if(parts.length!==2||parts[1].length!==2){
+      inp.style.border="2px solid #d9534f";
+      inp.classList.remove("shake");void inp.offsetWidth;inp.classList.add("shake");
+      markMistake("估读位数不足");
+      tip("✘ 读数要<b>估读到分度值下一位</b>：分度值 1mm，读数须保留<b>两位小数</b>（如 25.90）。","err");
+      return;
+    }
+    const target=state.s2.phase==="len"?25.90:18.40;
+    if(Math.abs(val-target)>0.06){
+      inp.style.border="2px solid #d9534f";
+      inp.classList.remove("shake");void inp.offsetWidth;inp.classList.add("shake");
+      if(val>target+1.5||Math.abs(val-(target+1))<0.2){
+        markMistake("未减去起点值");
+        tip("✘ 别忘了：起点是 1.00cm 整刻度，读数 = 末端刻度 <b>− 1.00cm</b>。","err");
+      }else{
+        tip("✘ 读数与真实值偏差过大，请正对视线重新估读。","err");
+      }
+      return;
+    }
+    inp.style.border="2px solid #2fa88a";
+    const arr=state.s2.phase==="len"?state.s2.lenVals:state.s2.widVals;
+    arr.push(val);
+    state.s2.count++;
+    addDataRow(arr.length,fmt2(val));
+    updateAvg(arr);
+    tip("✔ 第 "+arr.length+" 次读数 "+fmt2(val)+" cm 已记录。","ok");
+    if(arr.length<3){
+      tip("点击底部「重播」改变课本位置，进行第 "+(arr.length+1)+" 次测量。","info");
+      document.getElementById("readPanel").classList.add("hidden");
+      document.getElementById("sightPanel").classList.add("hidden");
+      state.s2.aligned=false;
+    }else{
+      document.getElementById("readPanel").classList.add("hidden");
+      document.getElementById("sightPanel").classList.add("hidden");
+      if(state.s2.phase==="len"){
+        state.s2.phase="wid";
+        state.s2.count=0;
+        tip("✔ 长度测量完成，平均值 \\(\\bar{x}="+fmt2(avg(state.s2.lenVals))+"\\text{cm}\\)。接下来测量课本的<b>宽</b>。","ok");
+        buildStep2();
+      }else{
+        state.done[2]=true;
+        state.unlocked=Math.max(state.unlocked,3);
+        renderTabs();
+        tip("✔ 宽度测量完成，平均值 \\(\\bar{x}="+fmt2(avg(state.s2.widVals))+"\\text{cm}\\)。第 2 步完成！","ok");
+        tip("点击顶部「3 测硬币直径」进入下一步。","info");
+      }
+      if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+    }
+  };
+}
+
+function updateS2TableHead(){
+  document.getElementById("dataHead").innerHTML='<tr><th class="px-3 py-2 text-left">次数</th><th class="px-3 py-2 text-left">'+(state.s2.phase==="len"?"长度":"宽度")+" / cm</th></tr>";
+  document.getElementById("dataBody").innerHTML="";
+  document.getElementById("avgBar").classList.add("hidden");
+  document.getElementById("tableUnit").textContent="单位：cm（保留两位小数）";
+}
+function addDataRow(no,val){
+  const tb=document.getElementById("dataBody");
+  const tr=document.createElement("tr");
+  tr.className="row-in border-b";
+  tr.innerHTML='<td class="px-3 py-2">'+no+'</td><td class="px-3 py-2">'+val+'</td>';
+  tb.appendChild(tr);
+}
+function updateAvg(arr){
+  const bar=document.getElementById("avgBar");
+  bar.classList.remove("hidden");
+  bar.innerHTML="平均值 x̄ = "+fmt2(avg(arr))+" cm（已自动计算）";
+}
+
+let coin={x:480,y:250,r:34};
+let triL={x:300,y:330,placed:false};
+let triR={x:640,y:330,placed:false};
+let ruler3={x:200,y:430};
+
+function drawTri(g,id,x,y,flip){
+  const grp=el("g",{id:id,transform:"translate("+x+","+y+")"},g);
+  const pts=flip?"90,0 90,90 0,90":"0,0 0,90 90,90";
+  el("polygon",{points:pts,fill:"#ffe9b8",stroke:"#2b3a4a","stroke-width":2,opacity:0.95},grp);
+  const pts2=flip?"90,22 90,68 44,68":"22,22 22,68 68,68";
+  el("polygon",{points:pts2,fill:"#c9a26b",stroke:"#2b3a4a","stroke-width":1.2},grp);
+  grp.classList.add("grabbable");
+  grp.style.cursor="grab";
+  return grp;
+}
+
+function buildStep3(){
+  clearLayer("layerScene");
+  clearLayer("layerOverlay");
+  const g=svgEl("layerScene");
+  const title=el("text",{x:500,y:36,"font-size":15,"text-anchor":"middle","font-weight":"bold",fill:"#2b3a4a"},g);
+  title.textContent="三角板辅助法：拖动两块三角板夹住硬币，直角边紧贴刻度尺";
+  const rulerG=drawRuler(g,ruler3.x,ruler3.y,30,{worn:false,id:"ruler3"});
+  const coinG=el("g",{id:"coinG",transform:"translate("+coin.x+","+coin.y+")"},g);
+  el("circle",{cx:0,cy:0,r:coin.r,fill:"#e8c766",stroke:"#8a6d2f","stroke-width":3},coinG);
+  el("circle",{cx:0,cy:0,r:coin.r-8,fill:"none",stroke:"#8a6d2f","stroke-width":1.5},coinG);
+  const ct=el("text",{x:0,y:5,"font-size":14,"text-anchor":"middle",fill:"#8a6d2f","font-weight":"bold"},coinG);
+  ct.textContent="1元";
+  coinG.classList.add("grabbable");
+  coinG.style.cursor="grab";
+  const tL=drawTri(g,"triL",triL.x,triL.y,false);
+  const tR=drawTri(g,"triR",triR.x,triR.y,true);
+  makeDraggable(coinG,(dx,dy)=>{
+    coin.x+=dx;coin.y+=dy;
+    coinG.setAttribute("transform","translate("+coin.x+","+coin.y+")");
+    checkTri(false);
+  },()=>{checkTri(true);});
+  makeDraggable(tL,(dx,dy)=>{
+    triL.x+=dx;triL.y+=dy;
+    tL.setAttribute("transform","translate("+triL.x+","+triL.y+")");
+    checkTri(false);
+  },()=>{checkTri(true);});
+  makeDraggable(tR,(dx,dy)=>{
+    triR.x+=dx;triR.y+=dy;
+    tR.setAttribute("transform","translate("+triR.x+","+triR.y+")");
+    checkTri(false);
+  },()=>{checkTri(true);});
+  rulerG.classList.add("grabbable");
+  rulerG.style.cursor="pointer";
+  rulerG.addEventListener("click",()=>{
+    markMistake("直接用刻度尺量圆弧");
+    showBadArc();
+  });
+  document.getElementById("dataHead").innerHTML='<tr><th class="px-3 py-2 text-left">次数</th><th class="px-3 py-2 text-left">直径 d / cm</th></tr>';
+  document.getElementById("dataBody").innerHTML="";
+  document.getElementById("avgBar").classList.add("hidden");
+  document.getElementById("tableUnit").textContent="d = |x₂ − x₁|，单位 cm";
+  tip("任务：用<b>三角板辅助法</b>测硬币直径，共 3 次。","info");
+  tip("① 拖动三角板，使两块三角板的竖直直角边分别夹住硬币左右两侧；② 三角板底边紧贴刻度尺；③ 系统自动读取 \\(x_1\\)、\\(x_2\\)，直径 \\(d=|x_2-x_1|\\)。","info");
+  if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+}
+
+function checkTri(final){
+  const lOK=Math.abs((triL.x+90)-(coin.x-coin.r))<16&&Math.abs((triL.y+90)-ruler3.y)<24;
+  const rOK=Math.abs((triR.x)-(coin.x+coin.r))<16&&Math.abs((triR.y+90)-ruler3.y)<24;
+  state.s3.placedL=lOK;
+  state.s3.placedR=rOK;
+  const tl=svgEl("triL"),tr=svgEl("triR");
+  if(tl){tl.style.filter=lOK?"drop-shadow(0 0 4px #2fa88a)":"none";}
+  if(tr){tr.style.filter=rOK?"drop-shadow(0 0 4px #2fa88a)":"none";}
+  if(lOK&&rOK&&final){
+    const x1=(coin.x-coin.r-ruler3.x)/CM;
+    const x2=(coin.x+coin.r-ruler3.x)/CM;
+    const d=Math.abs(x2-x1);
+    const dv=Math.round(rand2(d,0.02)*100)/100;
+    drawTriReading(x1,x2,dv);
+    state.s3.vals.push(dv);
+    state.s3.count++;
+    addDataRow(state.s3.vals.length,fmt2(dv));
+    updateAvg(state.s3.vals);
+    tip("✔ 第 "+state.s3.vals.length+" 次：\\(x_1="+fmt2(x1)+"\\text{cm}\\)，\\(x_2="+fmt2(x2)+"\\text{cm}\\)，\\(d=|x_2-x_1|="+fmt2(dv)+"\\text{cm}\\)。","ok");
+    if(state.s3.vals.length>=3){
+      state.done[3]=true;
+      state.unlocked=Math.max(state.unlocked,4);
+      renderTabs();
+      tip("✔ 硬币直径平均值 \\(\\bar{d}="+fmt2(avg(state.s3.vals))+"\\text{cm}\\)。第 3 步完成！","ok");
+      tip("点击顶部「4 测细铜丝直径」进入下一步。","info");
+    }else{
+      tip("拖动硬币换一个位置，进行第 "+(state.s3.vals.length+1)+" 次测量。","info");
+    }
+    if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+  }else if(final){
+    tip("还未夹好：两块三角板的<b>直角边要夹住硬币两侧</b>，且<b>底边紧贴刻度尺</b>。","warn");
+  }
+}
+
+function drawTriReading(x1,x2,d){
+  const ov=svgEl("layerOverlay");
+  ov.innerHTML="";
+  const y=ruler3.y-8;
+  const px1=ruler3.x+x1*CM;
+  const px2=ruler3.x+x2*CM;
+  el("line",{x1:px1,y1:y-90,x2:px1,y2:y+8,stroke:"#2b3a4a","stroke-width":1.2,"stroke-dasharray":"4 3"},ov);
+  el("line",{x1:px2,y1:y-90,x2:px2,y2:y+8,stroke:"#2b3a4a","stroke-width":1.2,"stroke-dasharray":"4 3"},ov);
+  el("line",{x1:px1,y1:y-80,x2:px2,y2:y-80,stroke:"#2fa88a","stroke-width":2,"marker-start":"url(#arrGreen)","marker-end":"url(#arrGreen)"},ov);
+  const t=el("text",{x:(px1+px2)/2,y:y-90,"font-size":13,"text-anchor":"middle",fill:"#2fa88a","font-weight":"bold"},ov);
+  t.textContent="d = "+fmt2(d)+" cm";
+}
+
+function showBadArc(){
+  const ov=svgEl("layerOverlay");
+  el("path",{d:"M "+(coin.x-coin.r-10)+" "+(coin.y-coin.r-30)+" A "+(coin.r+20)+" "+(coin.r+20)+" 0 0 1 "+(coin.x+coin.r+10)+" "+(coin.y-coin.r-30),fill:"none",stroke:"#d9534f","stroke-width":3,"stroke-dasharray":"6 4"},ov);
+  const t=el("text",{x:coin.x,y:coin.y-coin.r-44,"font-size":13,"text-anchor":"middle",fill:"#d9534f","font-weight":"bold"},ov);
+  t.textContent="不能直接用刻度尺量圆弧！";
+  tip("✘ 错误操作：<b>不能直接用刻度尺量圆弧</b>，要用<b>三角板辅助法</b>把直径“转移”到刻度尺上。","err");
+}
+
+let s4={coils:0,anim:null,loose:false};
+
+function buildStep4(){
+  clearLayer("layerScene");
+  clearLayer("layerOverlay");
+  s4.coils=0;s4.loose=false;
+  const g=svgEl("layerScene");
+  const title=el("text",{x:500,y:36,"font-size":15,"text-anchor":"middle","font-weight":"bold",fill:"#2b3a4a"},g);
+  title.textContent="累积法：把细铜丝紧密排绕在铅笔上，测总长度 L 与圈数 n";
+  const pencil=el("g",{id:"pencilG"},g);
+  el("rect",{x:220,y:230,width:560,height:26,rx:4,fill:"#c9a26b",stroke:"#8a6d2f","stroke-width":2},pencil);
+  el("polygon",{points:"780,230 820,243 780,256",fill:"#f5e6c8",stroke:"#8a6d2f","stroke-width":2},pencil);
+  el("polygon",{points:"806,238 820,243 806,248",fill:"#2b3a4a"},pencil);
+  el("rect",{x:200,y:230,width:20,height:26,fill:"#d9534f",stroke:"#8a6d2f","stroke-width":2},pencil);
+  el("g",{id:"coilG"},g);
+  const btnWrap=el("g",{},g);
+  const b1=el("g",{id:"btnWind",class:"grabbable",style:"cursor:pointer"},g);
+  el("rect",{x:300,y:330,width:150,height:40,rx:8,fill:"#2fa88a"},b1);
+  const b1t=el("text",{x:375,y:355,"font-size":15,"text-anchor":"middle",fill:"#fff","font-weight":"bold"},b1);
+  b1t.textContent="开始排绕";
+  const b2=el("g",{id:"btnLoose",style:"cursor:pointer"},g);
+  el("rect",{x:480,y:330,width:150,height:40,rx:8,fill:"#d9534f"},b2);
+  const b2t=el("text",{x:555,y:355,"font-size":15,"text-anchor":"middle",fill:"#fff","font-weight":"bold"},b2);
+  b2t.textContent="松散排绕";
+  b1.addEventListener("click",startWind);
+  b2.addEventListener("click",showLoose);
+  document.getElementById("dataHead").innerHTML='<tr><th class="px-3 py-2 text-left">项目</th><th class="px-3 py-2 text-left">数值</th></tr>';
+  document.getElementById("dataBody").innerHTML="";
+  document.getElementById("avgBar").classList.add("hidden");
+  document.getElementById("tableUnit").textContent="d = L / n";
+  tip("任务：点击「开始排绕」观看铜丝紧密缠绕 30 圈，然后输入总长度 \\(L\\)（cm，两位小数）与圈数 \\(n\\)。","info");
+  tip("原理：单根铜丝太细无法直接测，累积 \\(n\\) 圈测总宽 \\(L\\)，则 \\(d=\\dfrac{L}{n}\\)。","info");
+  if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+}
+
+function drawCoil(i,loose){
+  const g=svgEl("coilG");
+  const gap=loose?(i%3===0?9:4):4;
+  const x=300+i*gap;
+  const over=loose&&i%5===2;
+  el("ellipse",{cx:x,cy:243,rx:over?7:3.4,ry:16,fill:"none",stroke:"#b87333","stroke-width":2.4},g);
+}
+
+function startWind(){
+  if(s4.anim){return;}
+  const g=svgEl("coilG");
+  g.innerHTML="";
+  s4.coils=0;
+  s4.loose=false;
+  tip("铜丝正在紧密排绕：一圈挨一圈，<b>不重叠、不留空隙</b>……","info");
+  s4.anim=setInterval(()=>{
+    drawCoil(s4.coils,false);
+    s4.coils++;
+    if(s4.coils>=30){
+      clearInterval(s4.anim);
+      s4.anim=null;
+      state.s4.wrapped=true;
+      drawSpanL();
+      tip("✔ 排绕完成，共 30 圈，总宽度区域已标出。请在下方输入 \\(L\\) 与 \\(n\\)。","ok");
+      showS4Inputs();
+      if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+    }
+  },90);
+}
+
+function drawSpanL(){
+  const ov=svgEl("layerOverlay");
+  ov.innerHTML="";
+  const x1=300,x2=300+29*4;
+  const y=200;
+  el("line",{x1:x1,y1:y-14,x2:x1,y2:230,stroke:"#2b3a4a","stroke-width":1.2,"stroke-dasharray":"4 3"},ov);
+  el("line",{x1:x2,y1:y-14,x2:x2,y2:230,stroke:"#2b3a4a","stroke-width":1.2,"stroke-dasharray":"4 3"},ov);
+  el("line",{x1:x1,y1:y,x2:x2,y2:y,stroke:"#2fa88a","stroke-width":2,"marker-start":"url(#arrGreen)","marker-end":"url(#arrGreen)"},ov);
+  const t=el("text",{x:(x1+x2)/2,y:y-10,"font-size":13,"text-anchor":"middle",fill:"#2fa88a","font-weight":"bold"},ov);
+  t.textContent="总长度 L（30 圈铜丝的宽度）";
+}
+
+function showLoose(){
+  if(s4.anim){return;}
+  markMistake("铜丝排绕不紧密");
+  const g=svgEl("coilG");
+  g.innerHTML="";
+  s4.loose=true;
+  let i=0;
+  s4.anim=setInterval(()=>{
+    drawCoil(i,true);
+    i++;
+    if(i>=30){
+      clearInterval(s4.anim);
+      s4.anim=null;
+      tip("✘ 错误示范：这样排绕<b>有重叠、有空隙</b>，测出的 \\(L\\) 不准！必须<b>紧密排绕</b>。请重新「开始排绕」。","err");
+      if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+    }
+  },60);
+}
+
+function showS4Inputs(){
+  const box=document.getElementById("tipBox");
+  const div=document.createElement("div");
+  div.className="p-2 rounded bg-gray-50 border pop-in";
+  div.innerHTML=
+    '<div class="font-bold mb-2">输入测量数据：</div>'+
+    '<div class="mb-2 flex items-center gap-2">总长度 L = <input id="inL" type="text" class="border rounded px-2 py-1 w-24 text-sm" placeholder="3.00"> cm</div>'+
+    '<div class="mb-2 flex items-center gap-2">圈数 n = <input id="inN" type="text" class="border rounded px-2 py-1 w-24 text-sm" value="30"> 圈</div>'+
+    '<button id="s4Calc" class="px-3 py-1.5 rounded text-white text-sm" style="background:#2fa88a;">计算直径</button>';
+  box.appendChild(div);
+  box.scrollTop=box.scrollHeight;
+  document.getElementById("s4Calc").onclick=()=>{
+    const Lraw=document.getElementById("inL").value.trim();
+    const Nraw=document.getElementById("inN").value.trim();
+    const L=parseFloat(Lraw);
+    const n=parseInt(Nraw);
+    const inL=document.getElementById("inL");
+    const inN=document.getElementById("inN");
+    if(isNaN(L)){
+      inL.style.border="2px solid #d9534f";
+      tip("请输入总长度 L 的数值。","err");
+      return;
+    }
+    const parts=Lraw.split(".");
+    if(parts.length!==2||parts[1].length!==2){
+      inL.style.border="2px solid #d9534f";
+      markMistake("估读位数不足");
+      tip("✘ \\(L\\) 也要估读到 0.01cm，请保留<b>两位小数</b>（如 3.00）。","err");
+      if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+      return;
+    }
+    if(n===1){
+      inN.style.border="2px solid #d9534f";
+      markMistake("只量一圈");
+      tip("✘ <b>不能只量一圈</b>！单圈太细测不准，要用<b>累积法</b>排绕多圈（如 30 圈）。","err");
+      if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+      return;
+    }
+    if(n!==30){
+      inN.style.border="2px solid #d9534f";
+      tip("本次排绕了 30 圈，请填入 n = 30。","warn");
+      return;
+    }
+    if(Math.abs(L-3.00)>0.06){
+      inL.style.border="2px solid #d9534f";
+      tip("✘ \\(L\\) 与排绕总宽不符，请对照刻度重新估读（约 3.00cm）。","err");
+      if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+      return;
+    }
+    inL.style.border="2px solid #2fa88a";
+    inN.style.border="2px solid #2fa88a";
+    const d=L/n;
+    state.s4.L=L;state.s4.n=n;state.s4.d=d;
+    const tb=document.getElementById("dataBody");
+    tb.innerHTML="";
+    const rows=[["总长度 L",fmt2(L)+" cm"],["圈数 n",n+" 圈"],["铜丝直径 d = L/n",d.toFixed(3)+" cm = "+(d*10).toFixed(2)+" mm"]];
+    rows.forEach(r=>{
+      const tr=document.createElement("tr");
+      tr.className="row-in border-b";
+      tr.innerHTML='<td class="px-3 py-2">'+r[0]+'</td><td class="px-3 py-2 font-bold" style="color:#2fa88a;">'+r[1]+'</td>';
+      tb.appendChild(tr);
+    });
+    state.done[4]=true;
+    state.unlocked=Math.max(state.unlocked,5);
+    renderTabs();
+    tip("✔ \\(d=\\dfrac{L}{n}=\\dfrac{"+fmt2(L)+"}{30}="+d.toFixed(3)+"\\text{cm}="+(d*10).toFixed(2)+"\\text{mm}\\)。第 4 步完成！","ok");
+    tip("点击顶部「5 实验报告」查看汇总。","info");
+    if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+  };
+}
+
+function buildReport(){
+  clearLayer("layerScene");
+  clearLayer("layerOverlay");
+  document.getElementById("reportWrap").classList.remove("hidden");
+  const lenAvg=state.s2.lenVals.length?fmt2(avg(state.s2.lenVals)):"—";
+  const widAvg=state.s2.widVals.length?fmt2(avg(state.s2.widVals)):"—";
+  const coinAvg=state.s3.vals.length?fmt2(avg(state.s3.vals)):"—";
+  const wireD=state.s4.d?state.s4.d.toFixed(3)+" cm = "+(state.s4.d*10).toFixed(2)+" mm":"—";
+  const errList=state.mistakes.length?state.mistakes:["无——全部操作规范正确"];
+  const score=Math.max(60,100-state.mistakes.length*8);
+  const card=document.getElementById("reportCard");
+  card.innerHTML=
+    '<div class="text-center mb-4"><div class="text-xl font-bold" style="color:#2b3a4a;">实验报告 · 用刻度尺测量长度</div>'+
+    '<div class="text-xs text-gray-500 mt-1">八年级物理 · 长度测量专题</div></div>'+
+    '<div class="grid grid-cols-2 gap-3 text-sm">'+
+    repRow("刻度尺量程",state.s1.range||"0~30cm")+
+    repRow("分度值",state.s1.div||"1mm")+
+    repRow("零刻度线",(state.s1.zero||"已磨损")+"（从 1.00cm 起测，末端减 1.00cm）")+
+    repRow("课本长度平均值 x̄",lenAvg+" cm")+
+    repRow("课本宽度平均值 x̄",widAvg+" cm")+
+    repRow("硬币直径平均值 d̄",coinAvg+" cm")+
+    repRow("细铜丝直径 d = L/n",wireD)+
+    repRow("实验评分",score+" 分")+
+    '</div>'+
+    '<div class="mt-4 p-3 rounded" style="background:#f0faf6;border-left:4px solid #2fa88a;">'+
+    '<div class="font-bold text-sm mb-1" style="color:#2fa88a;">'+(state.mistakes.length?"易错点回顾":"实验评价")+'</div>'+
+    '<ul class="text-sm list-disc pl-5">'+errList.map(e=>"<li>"+e+"</li>").join("")+'</ul></div>'+
+    '<div class="mt-3 text-xs text-gray-500">方法小结：多次测量取平均值可减小误差，平均值保留与测量值相同的估读位数；测圆形物体用三角板辅助法 d=|x₂−x₁|；测微小长度用累积法 d=L/n。</div>';
+  document.getElementById("btnPrint").classList.remove("opacity-40","cursor-not-allowed");
+  state.done[5]=true;
+  renderTabs();
+  document.getElementById("dataHead").innerHTML='<tr><th class="px-3 py-2 text-left">项目</th><th class="px-3 py-2 text-left">结果</th></tr>';
+  const tb=document.getElementById("dataBody");
+  tb.innerHTML="";
+  [["课本长",lenAvg+" cm"],["课本宽",widAvg+" cm"],["硬币直径",coinAvg+" cm"],["铜丝直径",wireD]].forEach(r=>{
+    const tr=document.createElement("tr");
+    tr.className="row-in border-b";
+    tr.innerHTML='<td class="px-3 py-2">'+r[0]+'</td><td class="px-3 py-2 font-bold" style="color:#2fa88a;">'+r[1]+'</td>';
+    tb.appendChild(tr);
+  });
+  tipClear();
+  tip("实验报告已生成。如需重做某一步，点击顶部对应步骤标签即可返回。","info");
+  tip("点击底部「打印报告」可打印本报告。","info");
+}
+function repRow(k,v){
+  return '<div class="p-3 rounded bg-gray-50 border"><div class="text-xs text-gray-500">'+k+'</div><div class="font-bold mt-0.5" style="color:#2b3a4a;">'+v+'</div></div>';
+}
+
+function makeDraggable(node,onMove,onEnd){
+  node.addEventListener("pointerdown",(e)=>{
+    e.preventDefault();
+    const pt=svgPoint(e);
+    state.drag={node:node,x:pt.x,y:pt.y};
+    node.classList.add("dragging");
+    node.style.filter="drop-shadow(0 6px 6px rgba(43,58,74,.35))";
+    node.setPointerCapture(e.pointerId);
+  });
+  node.addEventListener("pointermove",(e)=>{
+    if(!state.drag||state.drag.node!==node){return;}
+    const pt=svgPoint(e);
+    const dx=pt.x-state.drag.x;
+    const dy=pt.y-state.drag.y;
+    state.drag.x=pt.x;state.drag.y=pt.y;
+    onMove(dx,dy);
+  });
+  node.addEventListener("pointerup",(e)=>{
+    if(state.drag&&state.drag.node===node){
+      state.drag=null;
+      node.classList.remove("dragging");
+      node.style.filter="";
+      if(onEnd){onEnd();}
+    }
+  });
+}
+function svgPoint(e){
+  const svg=svgEl("stage");
+  const pt=svg.createSVGPoint();
+  pt.x=e.clientX;pt.y=e.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+
+function gotoStep(n){
+  state.step=n;
+  renderTabs();
+  document.getElementById("reportWrap").classList.add("hidden");
+  document.getElementById("magnifier").classList.add("hidden");
+  document.getElementById("sightPanel").classList.add("hidden");
+  document.getElementById("readPanel").classList.add("hidden");
+  tipClear();
+  const hints={1:"点击刻度尺放大观察，完成三项选择",2:"拖拽刻度尺对齐课本被测边，读数 3 次",3:"拖拽三角板夹住硬币，测 3 次直径",4:"排绕铜丝并输入 L 与 n",5:"查看汇总报告，可打印"};
+  document.getElementById("stepHint").textContent="当前："+hints[n];
+  if(n===1){buildStep1();buildStep1Controls();tip("使用前要先观察刻度尺的<b>三要素</b>：量程、分度值、零刻度线。","info");}
+  if(n===2){buildStep2();}
+  if(n===3){buildStep3();}
+  if(n===4){buildStep4();}
+  if(n===5){buildReport();}
+}
+
+document.getElementById("magClose").onclick=()=>{
+  document.getElementById("magnifier").classList.add("hidden");
+};
+document.getElementById("btnReplay").onclick=()=>{
+  if(state.step===2){
+    book.x=260+Math.random()*120;
+    book.y=170+Math.random()*60;
+    ruler2.x=200+Math.random()*160;
+    ruler2.y=440;
+    buildStep2();
+    tip("已重置器材位置，请重新对齐并读数。","info");
+  }else if(state.step===3){
+    coin.x=420+Math.random()*140;
+    triL.x=280;triR.x=660;
+    buildStep3();
+    tip("硬币位置已改变，请重新用三角板夹取。","info");
+  }else if(state.step===4){
+    buildStep4();
+    tip("已重置，请重新排绕。","info");
+  }else{
+    gotoStep(state.step);
+  }
+};
+document.getElementById("btnGood").onclick=()=>{
+  if(state.step===2){
+    ruler2.x=book.x-20;
+    ruler2.y=book.y+book.h+8;
+    const r=svgEl("ruler2");
+    if(r){r.setAttribute("transform","translate("+ruler2.x+","+ruler2.y+")");}
+    checkAlign(true);
+    tip("正确示范：刻度尺有刻度的一边紧贴被测边，且与被测边平行；读数时视线正对刻度线。","ok");
+  }else if(state.step===3){
+    triL.x=coin.x-coin.r-90;
+    triL.y=ruler3.y-90;
+    triR.x=coin.x+coin.r;
+    triR.y=ruler3.y-90;
+    const tl=svgEl("triL"),tr=svgEl("triR");
+    if(tl){tl.setAttribute("transform","translate("+triL.x+","+triL.y+")");}
+    if(tr){tr.setAttribute("transform","translate("+triR.x+","+triR.y+")");}
+    checkTri(true);
+  }else if(state.step===4){
+    startWind();
+  }else{
+    tip("请按当前步骤的提示完成操作。","info");
+  }
+};
+document.getElementById("btnBad").onclick=()=>{
+  if(state.step===1){
+    tip("常见错误：不观察零刻度线磨损就直接从零刻度测量，导致读数错误。","err");
+  }else if(state.step===2){
+    showBadSight("up");
+    markMistake("观看了错误示范（斜视）");
+    tip("错误示范：视线斜视会使读数偏差；刻度尺歪斜、未贴紧被测边同样错误。","err");
+  }else if(state.step===3){
+    showBadArc();
+  }else if(state.step===4){
+    showLoose();
+  }else{
+    tip("请按当前步骤的提示完成操作。","info");
+  }
+};
+document.getElementById("btnSubmit").onclick=()=>{
+  const s=state.step;
+  if(s===1){
+    if(state.done[1]){tip("第 1 步已完成，可进入下一步。","ok");gotoStep(2);}
+    else{tip("请先完成三项观察选择。","warn");}
+  }else if(s===2){
+    if(state.done[2]){gotoStep(3);}
+    else{tip("需完成长、宽各 3 次合格读数。当前长 "+state.s2.lenVals.length+"/3，宽 "+state.s2.widVals.length+"/3。","warn");}
+  }else if(s===3){
+    if(state.done[3]){gotoStep(4);}
+    else{tip("需完成 3 次直径测量。当前 "+state.s3.vals.length+"/3。","warn");}
+  }else if(s===4){
+    if(state.done[4]){gotoStep(5);}
+    else{tip("请先排绕并正确输入 L 与 n。","warn");}
+  }else{
+    tip("报告已生成，可点击「打印报告」。","ok");
+  }
+};
+document.getElementById("btnPrint").onclick=()=>{
+  if(!state.done[5]){
+    tip("完成步骤 5 后才能打印报告。","warn");
+    return;
+  }
+  window.print();
+};
+
+setupSight();
+setupReadSubmit();
+renderTabs();
+gotoStep(1);
+window.addEventListener("load",()=>{
+  if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+});
+</script>
+ </body>
+</html>
